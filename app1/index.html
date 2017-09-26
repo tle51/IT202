@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>App 1</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <style>
+        #template{
+            display: none;
+        }
+        
+        .Completed{
+            color: green;
+        }
+        .Incomplete{
+            color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="template" class="hidden">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Panel title</h3>
+        </div>
+        <div class="panel-body">
+            Panel content
+        </div>
+    </div>
+    </div>
+</body>
+<script>
+    /* global $ */
+
+    $.get("https://data.cityofchicago.org/resource/cdmx-wzbz.json?$limit=100", function(response) {
+        //console.log(response);
+        $.each(response, function(i, v) {
+            //console.log(v.street_address);
+            //$("body").append("<strong>" + v.service_request_number + "</strong>" + " " + "<p>" + v.street_address + "<br>" + v.status + "</p>");
+            
+            var templateClone = $("#template").find(".panel").clone();
+            templateClone.find(".panel-title").text(v.service_request_number).attr("class", v.status);
+            templateClone.find(".panel-body").html(v.street_address + "<br>" + v.status);
+
+            $("body").append(templateClone);
+        });
+    });
+</script>
+
+</html>
