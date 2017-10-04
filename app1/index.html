@@ -32,11 +32,17 @@
         </div>
     </div>
     </div>
+   
+        <input type="text" name="userInput" id="inputText"/>
+        <button id="btn">Submit</button>
+
 </body>
 <script>
     /* global $ */
+ 
+   $("#btn").on("click",function(){
 
-    $.get("https://data.cityofchicago.org/resource/cdmx-wzbz.json?$limit=100", function(response) {
+    $.get("https://data.cityofchicago.org/resource/cdmx-wzbz.json?$limit=100&zip_code=" + $("#inputText").val(), function(response) {
         //console.log(response);
         $.each(response, function(i, v) {
             //console.log(v.street_address);
@@ -49,6 +55,8 @@
             $("body").append(templateClone);
         });
     });
+    
+   }); 
 </script>
 
 </html>
