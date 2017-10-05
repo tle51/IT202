@@ -19,15 +19,9 @@
         #map {
             height: 100%;
         }
-
-        .search-button {
-            margin-top: 25px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .result-screen {
-            height: 50%;
+        
+        #s3{
+            height: 100%;
         }
 
         .result-anchor {
@@ -40,21 +34,34 @@
             margin: 0 auto;
         }
 
-        .map-screen {
-            float: right;
-            width: 50%;
-            height: 100%;
-        }
-
-        .left-screen {
-            float: left;
-            width: 50%;
+        .screen {
+            display: none;
         }
     </style>
 </head>
 
 <body>
-    <div class="left-screen">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Project 3</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#s1">Filter <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#s2">Result</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#s3">Map</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="s1" class="screen">
         <div class="jumbotron jumbo-screen">
             <h1 class="display-3">City of Chicago Food Inspection</h1>
             <p class="lead"></p>
@@ -85,20 +92,20 @@
                     </div>
 
                 </div>
-
             </p>
         </div>
-        <div class="result-screen">
-            <div class="card text-white bg-dark mb-3 card-element" style="max-width: 20rem;">
-                <div class="card-header">Result Count</div>
-                <div class="card-body">
-                    <p class="card-text result-anchor">0</p>
-                </div>
+    </div>
+
+    <div id="s2" class="screen">
+        <div class="card text-white bg-dark mb-3 card-element" style="max-width: 20rem;">
+            <div class="card-header">Result Count</div>
+            <div class="card-body">
+                <p class="card-text result-anchor">0</p>
             </div>
         </div>
-
     </div>
-    <div class="map-screen">
+
+    <div id="s3" class="screen">
         <div id="map"></div>
     </div>
 
@@ -106,6 +113,21 @@
     <script type="text/javascript">
         /* global $ */
         /* global google */
+
+        $("#s1.screen").css("display", "inline");
+
+        $(".nav-link").on("click", function() {
+            $(".screen").css("display", "none"); //hide all screens
+            $($(this).attr("href") + ".screen").css("display", "inline"); //show selected screen
+            console.log($(this).attr("href"));
+        });
+
+        // function initMap() {
+        //     var map = new google.maps.Map(document.getElementById('map'), {
+        //         zoom: 9,
+        //         center: { lat: 41.8781, lng: 87.6298 }
+        //     });
+        // };
 
         $(".searchButton").on("click", function() {
             var paramObj = {};
