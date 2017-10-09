@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title> </title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
@@ -11,10 +12,12 @@
     </select>
 
     <script>
-        $.get("https://data.cityofchicago.org/resource/tt4n-kn4t.json?$query=SELECT%20DISTINCT%20department", function(response){
-           $.each(response, function(index,value){
-              $("select").append("<option>" + value.department + "</option"); 
-           });
+        $(document).ready(function() {
+            $.get("https://data.cityofchicago.org/resource/tt4n-kn4t.json?$query=SELECT%20DISTINCT%20department", function(response) {
+                $.each(response, function(index, value) {
+                    $("select").append("<option>" + value.department + "</option");
+                });
+            });
         });
     </script>
 
