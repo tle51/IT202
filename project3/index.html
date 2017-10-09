@@ -12,16 +12,20 @@
         html,
         body {
             height: 100%;
+            width: 100%;
             margin: 0;
             padding: 0;
         }
 
         #map {
             height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
         }
-        
-        #s3{
-            height: 100%;
+    
+        #card-template {
+            display: none;
         }
 
         .result-anchor {
@@ -37,12 +41,17 @@
         .screen {
             display: none;
         }
+        
+        .search-button{
+            padding-top: 30px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Project 3</a>
+        <a class="navbar-brand">Project 3</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -103,6 +112,19 @@
                 <p class="card-text result-anchor">0</p>
             </div>
         </div>
+        <div class="row">
+            <div id="card-template" class="hidden">
+                <div class="card col-sm-4">
+                    <div class="card-header">
+                        Featured
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title">Special title treatment</h4>
+                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="s3" class="screen">
@@ -151,20 +173,23 @@
 
             $.get("https://data.cityofchicago.org/resource/cwig-ma7x.json?" + $.param(paramObj), function(response) {
                 console.log(response.length);
-
+                console.log(parseFloat(response[0].latitude) + " " + parseFloat(response[0].longitude));
+                
                 if (response.length > 0) {
                     var map = new google.maps.Map(document.getElementById('map'), {
                         zoom: 9,
                         center: { lat: parseFloat(response[0].latitude), lng: parseFloat(response[0].longitude) }
+                        //center: new google.maps.LatLng(parseFloat(response[0].latitude), parseFloat(response[0].longitude))
                     });
 
                     // Update response count
                     $(".result-anchor").text(response.length);
 
                     $.each(response, function(i, v) {
-                        console.log(v);
+                        //console.log(v);
 
-                        var contentString = "<h6>" + v.aka_name + "</h6>";
+                        // Map screen
+                        var contentString = "<h6>" + v.aka_name + "</h6><br><h7>" + v.address + "</h7><br><h7>" + v.results + "</h7>";
 
                         var infowindow = new google.maps.InfoWindow({
                             content: contentString
@@ -179,6 +204,14 @@
                         marker.addListener('click', function() {
                             infowindow.open(map, marker);
                         });
+
+                        // Result screen
+                        var templateClone = $("#card-template").find(".card").clone();
+                        templateClone.find(".card-header").text(v.inspection_id).css("color", "red");
+                        templateClone.find(".card-title").text(v.dba_name);
+                        templateClone.find(".card-text").html("<strong>AKA Name:</strong> " + v.aka_name + "<br>" + "<strong>Address: </strong>" + v.address + "<br>" + "<strong>Inspection Date: </strong>" + v.inspection_date + "<br>" + "<strong>Status: </strong>" + v.results);
+                        $("#s2 .row").append(templateClone);
+                        // $("#s2 .row").append("<br>");
                     });
                 }
             });
