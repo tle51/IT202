@@ -192,7 +192,7 @@
             else if (edge == 'left' && character.x < 0) {
                 reachedEdge = true;
             }
-            else if (edge == 'right' && character.x > c.width-100) {
+            else if (edge == 'right' && character.x > c.width - 100) {
                 reachedEdge = true;
             }
             return reachedEdge;
@@ -200,6 +200,9 @@
 
         $(document).ready(function() {
             c.focus();
+            ctx.font = '24px Georgia';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText('- Click canvas to start game -', (c.width / 2) - 150, c.height / 2 - 100);
 
             // Arrow key keydown event handlers to change player position
             $('#gameCanvas').on("keydown", function(event) {
@@ -234,12 +237,17 @@
                         break;
                 }
             });
+            
+            $("#gameCanvas").on("click", function() {
+                // Disables click event
+                $("#gameCanvas").off('click');
+                
+                // Call game loop
+                gameLoop();
 
-            // Call game loop
-            gameLoop();
-
-            // Redraw 60 frames per second
-            requestAnimationFrame(gameLoop);
+                // Redraw 60 frames per second
+                requestAnimationFrame(gameLoop);
+            });
         });
     </script>
 
