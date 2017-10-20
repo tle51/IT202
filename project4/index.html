@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <style type="text/css">
+        #gameCanvas {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas" width="800" height="800" tabindex="1"></canvas>
+
+    <script type="text/javascript">
+        /* global $ */
+        /* global Image */
+
+        // Canvas
+        var c = document.getElementById("gameCanvas"); //canvas object c.height, etc
+        var ctx = c.getContext("2d");
+
+        // Game objects
+        var player = { x: (c.width / 2) - 50, y: c.height - 100, shape: "image", width: 100, height: 100, speed: 30 };
+        var benefit = { x: 100, y: 20, radius: 50, shape: "circle", color: "green", speed: 3 };
+        var harm = { x: 300, y: 20, radius: 50, shape: "circle", color: "red", speed: 3 };
+        var game = { score: 0, lives: 3, gameOver: false };
+
+        // Game loop function
+        function gameLoop() {
+            if (!game.gameOver) {
+                // Clear canvas character
+                ctx.clearRect(0, 0, c.width, c.height);
+
+                // Update characters position properties
+                harm.y += harm.speed;
+                benefit.y += benefit.speed;
+            }
+
+            if (areColliding(player, harm)) {
+                //  set properties
+                harm.y -= c.height;
+                harm.x = Math.random() * c.width + 1;
+
+                while (areCollidingCircle(benefit, harm)) {
+                    harm.x = Math.random() * c.width + 1;
+                }
+
+                // Reduce player life and check if game over
+                game.lives--;
+                if (game.lives == 0 && !game.gameOver) {
+                    game.gameOver = true;
+                    // Clear game objects
+                    ctx.clearRect(0, 0, c.width, c.height);
+
+                    // Draw game over text
+                    ctx.font = '48px Georgia';
+                    ctx.fillStyle = 'red';
+                    ctx.fillText('GAME OVER', (c.width / 2) - 150, c.height / 2);
+                }
+
+            }
+
+            if (areColliding(player, benefit)) {
+                //  set properties
+                benefit.y -= c.height;
+                benefit.x = Math.random() * c.width + 1;
+
+                // Randomize new x location until not colliding with other game object
+                while (areCollidingCircle(benefit, harm)) {
+                    benefit.x = Math.random() * c.width + 1;
+                }
+
+                // Update score
+                game.score += 5;
+            }
+
+            if (reachedEdge(harm, 'bottom')) {
+                // set x property
+                harm.y -= c.height;
+                harm.x = Math.random() * c.width + 1;
+                while (areCollidingCircle(benefit, harm)) {
+                    harm.x = Math.random() * c.width + 1;
+                }
+            }
+
+            if (reachedEdge(benefit, 'bottom')) {
+                // set x property
+                benefit.y -= c.height;
+                benefit.x = Math.random() * c.width + 1;
+                while (areCollidingCircle(benefit, harm)) {
+                    benefit.x = Math.random() * c.width + 1;
+                }
+            }
+
+            // load character objects
+            if (!game.gameOver) {
+                drawCharacter(player);
+                drawCharacter(harm);
+                drawCharacter(benefit);
+            }
+
+            // Score and life
+            drawGameInfo();
+
+            //console.log(game.lives);
+            if (!game.gameOver) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Draw game character
+        function drawCharacter(character) {
+            switch (character.shape) {
+                case 'circle':
+                    drawCircle(character.x, character.y, character.radius, character.color);
+                    break;
+                case 'image':
+                    drawImage(character.x, character.y, character.height, character.width);
+                    break;
+                default:
+                    console.log('character.shape case fell through');
+            }
+        }
+
+        // Draw circle
+        function drawCircle(x, y, radius, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+
+            // Fill in circle
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        // Draw image
+        function drawImage(x, y, width, height) {
+            var imageObj = new Image();
+            imageObj.src = "potato.png";
+            ctx.drawImage(imageObj, x, y, width, height);
+        }
+
+        // Draw score text
+        function drawGameInfo() {
+            // Score text
+            ctx.font = '20px Georgia';
+            ctx.fillStyle = 'blue';
+            ctx.fillText('Score: ' + game.score, c.width - 120, 50);
+
+            // Player life text
+            ctx.font = '20px Georgia';
+            ctx.fillStyle = '#006600';
+            ctx.fillText('Life: ' + game.lives, c.width - 120, 30);
+        }
+
+        // Collision detection
+        function areColliding(character1, character2) {
+            // collision with circle and rectangle that is drawn from top-left
+            if (character2.x + character2.radius > character1.x &&
+                character2.x - character2.radius < (character1.x + character1.width) &&
+                character2.y + character2.radius > character1.y &&
+                character2.y - character2.radius < (character1.y + character1.height)) {
+                //collided
+                return true;
+            }
+            return false;
+        }
+
+        function areCollidingCircle(character1, character2) {
+            // use 2d collision for circles
+            var dx = character1.x - character2.x;
+            var dy = character1.y - character2.y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < character1.radius + character2.radius) {
+                // collision detected!
+                return true;
+            }
+            return false;
+        }
+
+        // Edge detection
+        function reachedEdge(character, edge) {
+            var reachedEdge = false;
+            if (edge == 'bottom' && character.y > c.height) {
+                reachedEdge = true;
+            }
+            else if (edge == 'left' && character.x < 0) {
+                reachedEdge = true;
+            }
+            else if (edge == 'right' && character.x > c.width-100) {
+                reachedEdge = true;
+            }
+            return reachedEdge;
+        }
+
+        $(document).ready(function() {
+            c.focus();
+
+            // Arrow key keydown event handlers to change player position
+            $('#gameCanvas').on("keydown", function(event) {
+                switch (event.keyCode) {
+                    // left arrow
+                    case 37:
+                        if (!reachedEdge(player, 'left')) {
+                            player.x -= player.speed;
+                        }
+                        event.preventDefault();
+                        //console.log(player.x);
+                        break;
+                        // up arrow
+                    case 38:
+                        //player.y -= player.speed;
+                        event.preventDefault();
+                        //console.log(player.x);
+                        break;
+                        // right arrow
+                    case 39:
+                        if (!reachedEdge(player, 'right')) {
+                            player.x += player.speed;
+                        }
+                        event.preventDefault();
+                        //console.log(player.x);
+                        break;
+                        // down arrow
+                    case 40:
+                        //player.y += player.speed;
+                        event.preventDefault();
+                        //console.log(player.x);
+                        break;
+                }
+            });
+
+            // Call game loop
+            gameLoop();
+
+            // Redraw 60 frames per second
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
