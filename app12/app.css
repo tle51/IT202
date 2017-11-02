@@ -95,7 +95,7 @@ html, body {
 
 /*shine product grid*/
 #shrine-products {
-  -mdc-layout-grid-gutter: 8px;
+  --mdc-layout-grid-gutter: 8px;
 }
 
 #shrine-products .mdc-layout-grid__cell {
