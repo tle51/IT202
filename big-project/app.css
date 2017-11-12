@@ -1,0 +1,75 @@
+/* stylelint-disable */
+
+html, body {
+  height: 100%;
+  background-color: #f2f2f2;
+}
+
+/* Toolbar Style */
+#cta-header {
+  background-color: var(--mdc-theme-background);
+  color: var(--mdc-theme-text-primary-on-background);
+}
+
+#cta-header .mdc-toolbar__section {
+  overflow: visible;
+}
+
+/* Hide actual text for screen readers */
+#cta-logo > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+#cta-nav-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 40px;
+  text-decoration: none;
+}
+
+#cta-nav-icon:visited,
+#cta-nav-icon:active,
+#cta-nav-icon:focus {
+  color: var(--mdc-theme-text-primary-on-background);
+}
+
+/*Temporary Drawer Style*/
+#cta-nav-menu {
+  text-transform: uppercase;
+  padding-left: 16px;
+}
+
+#cta-nav-menu .mdc-temporary-drawer__drawer {
+  background-color: #fafafa;
+}
+
+#cta-nav-menu .mdc-temporary-drawer__header::before {
+  padding-top: 30%;
+}
+
+#cta-nav-menu .mdc-list-item {
+  height: 32px;
+  padding-left: 32px;
+  letter-spacing: .2em;
+}
+
+/*shine product grid*/
+#cta-products {
+  --mdc-layout-grid-gutter: 8px;
+}
+
+#cta-products .mdc-layout-grid__cell {
+  display: flex;
+  justify-content: center;
+}
+
+.hidden{
+  display: none;
+}
