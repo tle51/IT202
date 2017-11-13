@@ -91,3 +91,25 @@ html, body {
 .bus-button-div{
   padding-top: 5px;
 }
+
+.screen-header{
+  margin-bottom: -5px;
+  width: 400px;
+}
+
+.sub-header{
+  text-align: center;
+  margin-bottom: -3px;
+}
+
+.setting-select{
+  margin-left: 5px;
+}
+
+.setting-button{
+  border: 1px solid lightgrey;
+}
+
+.bus-button{
+  border: 1px solid lightgrey;
+}

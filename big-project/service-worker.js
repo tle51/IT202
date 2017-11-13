@@ -3,7 +3,8 @@ var dataCacheName = 'cta-data-v1';
 var filesToCache = [
   './',
   './index.html',
-  './app.css'
+  './app.css',
+  './cta-logo.png'
 ];
 
 self.addEventListener('install', function(e) {
