@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>CTA Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" sizes="192x192" href="./cta-logo.png">
+  <link rel="shortcut icon" href="./cta-logo.png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/6.0.0/normalize.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@0.9.1/dist/material-components-web.min.css">
+  <link rel="stylesheet" href="./app.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+  <link rel="manifest" href="./manifest.json">
+</head>
+
+<body class="mdc-typography">
+
+  <!-- Toolbar -->
+  <header id="cta-header" class="mdc-toolbar mdc-toolbar--fixed mdc-theme--text-primary-on-background">
+    <div class="mdc-toolbar__row">
+      <section class="mdc-toolbar__section mdc-toolbar__section--align-start">
+        <a id="cta-nav-icon" class="material-icons mdc-ripple-surface" href="#" aria-label="Click to show the navigation menu" aria-controls="cta-nav-menu" data-mdc-auto-init="MDCRipple" data-mdc-ripple-is-unbounded>menu</a>
+        <h1 class="mdc-toolbar__title"><span>CTA Tracker</span></h1>
+      </section>
+    </div>
+  </header>
+
+  <!-- Temporary Drawer -->
+  <aside id="cta-nav-menu" class="mdc-temporary-drawer" data-mdc-auto-init="MDCTemporaryDrawer">
+    <nav class="mdc-temporary-drawer__drawer">
+      <header class="mdc-temporary-drawer__header"></header>
+      <nav class="mdc-temporary-drawer__content mdc-list">
+        <a class="mdc-list-item nav-item" href="#bus-screen">Bus Tracker</a>
+        <a class="mdc-list-item nav-item" href="#train-screen">Train Tracker</a>
+        <a class="mdc-list-item nav-item" href="#map-screen">Map</a>
+        <a class="mdc-list-item nav-item" href="#setting-screen">Setting</a>
+      </nav>
+    </nav>
+  </aside>
+
+  <!--bus screen-->
+  <div id="bus-screen" class="mdc-toolbar-fixed-adjust hidden screen">
+    <div class="mdc-layout-grid">
+      <h1 class="mdc-typography screen-header">Bus Tracker</h1>
+    </div>
+    <div class="divider-container">
+      <ul class="mdc-list">
+        <li role='separator' class='mdc-list-divider'></li>
+      </ul>
+    </div>
+    <!--dropdown lists container-->
+    <div class="mdc-layout-grid">
+      <div class="route-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="route-select" onchange="getDirection(this.value)">
+          <option value="" selected>Pick a route</option>
+          <!--<option value="grains">Bread, Cereal, Rice, and Pasta</option>-->
+        </select>
+      </div>
+      <div class="direction-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="dir-select" onchange="getstop()">
+          <option value="">Pick a direction</option>
+        </select>
+      </div>
+      <div class="stop-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="stop-select">
+          <option value="">Pick a stop</option>
+        </select>
+      </div>
+      <div class="mdc-layout-grid__cell--span-3 bus-button-div">
+        <button class="mdc-button bus-button">Search</button>
+      </div>
+    </div>
+    <!--result container-->
+    <div class="result-container">
+      <ul class="mdc-list">
+      </ul>
+    </div>
+  </div>
+
+  <!--train screen-->
+  <div id="train-screen" class="mdc-toolbar-fixed-adjust screen">
+    <div class="mdc-layout-grid">
+      <h1 class="mdc-typography screen-header">Train Tracker</h1>
+    </div>
+    <div class="divider-container">
+      <ul class="mdc-list">
+        <li role='separator' class='mdc-list-divider'></li>
+      </ul>
+    </div>
+    <!---->
+    <div class="mdc-layout-grid">
+      <div class="train-color-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="train-color-select" onchange="onTrainColorSelect()">
+          <option value ="" selected>Pick a train line</option>
+          <option value="7">Red</option>
+          <option value="8">Blue</option>
+          <option value="9">Green</option>
+          <option value="10">Brown</option>
+          <option value="11">Purple</option>
+          <option value="13">Yellow</option>
+          <option value="14">Pink</option>
+          <option value="15">Orange</option>
+        </select>
+      </div>
+      <div class="train-stop-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="train-stop-select" onchange="">
+          <option value="" selected>Pick a stop</option>
+        </select>
+      </div>
+      <div class="train-dir-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="train-dir-select">
+          <option value="" selected>Pick a direction</option>
+        </select>
+      </div>
+      <div class="mdc-layout-grid__cell--span-3">
+        <button class="mdc-button train-button">Search</button>
+      </div>
+    </div>
+    
+  </div>
+
+  <!--map screen-->
+  <div id="map-screen" class="mdc-toolbar-fixed-adjust hidden screen">
+    <div class="mdc-layout-grid">
+      <h1 class="mdc-typography screen-header">Map</h1>
+    </div>
+    <div class="divider-container">
+      <ul class="mdc-list">
+        <li role='separator' class='mdc-list-divider'></li>
+      </ul>
+    </div>
+  </div>
+
+  <!--setting screen-->
+  <div id="setting-screen" class="mdc-toolbar-fixed-adjust hidden screen">
+    <div class="mdc-layout-grid">
+      <h1 class="mdc-typography screen-header">Setting</h1>
+    </div>
+    <div class="setting-container">
+      <ul class="mdc-list">
+        <li role='separator' class='mdc-list-divider'></li>
+        <li class='mdc-list-item'>
+          <h3 class="mdc-typography">Font: </h3>
+          <select class="mdc-select setting-select" id="fontFamily-select">
+            <option value="Roboto,sans-serif" selected>Default</option>
+            <option value="Arial, Helvetica, sans-serif">Arial</option>
+            <option value="Impact, Charcoal, sans-serif">Impact</option>
+          </select>
+        </li>
+        <li role='separator' class='mdc-list-divider'></li>
+        <li class="mdc-list-item">
+          <h3 class="mdc-typography">Font Size:</h3>
+          <select class="mdc-select setting-select" id="fontSize-select">
+            <option value="1rem" selected>Default</option>
+            <option value="12px">Smaller (12px)</option>
+            <option value="20px">Bigger (20px)</option>
+          </select>
+        </li>
+        <li role='separator' class='mdc-list-divider'></li>
+        <li class="mdc-list-item">
+          <h3 class="mdc-typography">Font Color:</h3>
+          <select class="mdc-select setting-select" id="fontColor-select">
+            <option value="#000000" selected>Default</option>
+            <option value="#ff3333">Red</option>
+            <option value="#3399ff">Blue</option>
+            <option value="#00e600">Green</option>
+            <option value="#9933ff">Purple</option>
+          </select>
+        </li>
+        <li role='separator' class='mdc-list-divider'></li>
+      </ul>
+      <button class="mdc-button setting-button">Save Change</button>
+    </div>
+  </div>
+
+  <!--Ink ripple effect for toolbar menu button-->
+  <script src="https://unpkg.com/material-components-web@0.9.1/dist/material-components-web.min.js"></script>
+  <script>
+    /*global mdc*/
+    mdc.autoInit()
+  </script>
+
+  <!--open drawer-->
+  <script>
+    /*global mdc*/
+    //mdc.autoInit();
+    document.getElementById('cta-nav-icon').addEventListener('click', function(evt) {
+      evt.preventDefault();
+      document.getElementById('cta-nav-menu').MDCTemporaryDrawer.open = true;
+    });
+    
+    $(".nav-item").on("click", function(){
+      document.getElementById('cta-nav-menu').MDCTemporaryDrawer.open = false;
+    });
+  </script>
+
+  <!-- service worker -->
+  <script>
+    /*global navigator*/
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('./service-worker.js')
+        .then(function() { console.log("Service Worker Registered"); });
+    }
+  </script>
+
+  <!---->
+  <script type="text/javascript">
+    /* global $ */
+
+    //screen navigations
+    $(".nav-item").on("click", function(event) {
+      console.log($(this).attr("href"));
+      $(".screen").addClass("hidden");
+      $($(this).attr("href")).removeClass("hidden");
+      event.preventDefault();
+    });
+  </script>
+
+  <!--bus screen script-->
+  <script>
+    /* global $ */
+    document.getElementById("dir-select").disabled = true;
+    document.getElementById("stop-select").disabled = true;
+
+    // Get list of bus routes and append to dropdown list
+    $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getroutes&key=AYMMccFCSithRdYDy5JUAxgts&format=json", function(response) {
+      //console.log(response);
+      var jsonObj = JSON.parse(response);
+      console.log(jsonObj["bustime-response"]["routes"]);
+      $.each(jsonObj["bustime-response"]["routes"], function(index, value) {
+        //console.log(value.rt);
+        $("#bus-screen .route-dropdown .mdc-select").append("<option value='" + value.rt + "'>" + value.rt + " - " + value.rtnm + "</option>");
+      });
+    });
+
+    // Get direction of routes after user select a route
+    function getDirection(rtValue) {
+      $("#bus-screen .direction-dropdown .mdc-select").empty();
+      $("#bus-screen .direction-dropdown .mdc-select").append("<option value='' selected>Pick a direction</option>");
+      $("#bus-screen .stop-dropdown .mdc-select").empty();
+      $("#bus-screen .stop-dropdown .mdc-select").append("<option value='' selected>Pick a stop</option>");
+      console.log(rtValue);
+
+      $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getdirections&key=AYMMccFCSithRdYDy5JUAxgts&format=json&rt=" + rtValue, function(response) {
+        var jsonObj = JSON.parse(response);
+        console.log(jsonObj["bustime-response"]["directions"]);
+        $.each(jsonObj["bustime-response"]["directions"], function(index, value) {
+          $("#bus-screen .direction-dropdown .mdc-select").append("<option value ='" + value.dir + "'>" + value.dir + "</option>");
+        });
+        document.getElementById("dir-select").disabled = false;
+      });
+    }
+
+    // Get the stops with route and direction
+    function getstop() {
+      var busRoute = document.getElementById("route-select").value;
+      var busDir = document.getElementById("dir-select").value;
+
+      $("#bus-screen .stop-dropdown .mdc-select").empty();
+      $("#bus-screen .stop-dropdown .mdc-select").append("<option value='' selected>Pick a stop</option>");
+
+      $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getstops&key=AYMMccFCSithRdYDy5JUAxgts&format=json&rt=" + busRoute + "&dir=" + busDir, function(response) {
+        var jsonObj = JSON.parse(response);
+        $.each(jsonObj["bustime-response"]["stops"], function(index, value) {
+          $("#bus-screen .stop-dropdown .mdc-select").append("<option value='" + value.stpid + "'>" + value.stpid + " - " + value.stpnm + "</option>");
+        });
+        document.getElementById("stop-select").disabled = false;
+      });
+    }
+
+    // Button to get value from dropdown lists and get time prediction of next avaliable bus
+    $(".bus-button").on("click", function() {
+      var busRoute = document.getElementById("route-select").value;
+      var busStop = document.getElementById("stop-select").value;
+      var indexN = 0;
+      $("#bus-screen .result-container .mdc-list").empty();
+      console.log(busRoute + " " + busStop);
+
+      // Get prediction time
+      if (busRoute != "" && busStop != "") {
+        $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getpredictions&key=AYMMccFCSithRdYDy5JUAxgts&format=json&rt=" + busRoute + "&stpid=" + busStop, function(response) {
+          var jsonObj = JSON.parse(response);
+          console.log(jsonObj["bustime-response"]["prd"]);
+          $("#bus-screen .result-container .mdc-list").append("<h3 class='mdc-typography sub-header'>Arrival Times</h3>");
+          $("#bus-screen .result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+
+          if (jsonObj["bustime-response"]["prd"] != null) {
+            $.each(jsonObj["bustime-response"]["prd"], function(index, value) {
+              indexN++;
+              var prdtmPart = value.prdtm.split(" ");
+              var prdtmTime = prdtmPart[1].split(":");
+              var ampm = "";
+              var hourPart = "";
+
+              // convert 24hr to 12hr time
+              if (prdtmTime[0] > 11) {
+                ampm = "PM";
+                hourPart = 12;
+                if (prdtmTime[0] > 12) {
+                  hourPart = prdtmTime[0] - 12;
+                  console.log(hourPart);
+                }
+              }
+              else {
+                hourPart = prdtmTime[0];
+                ampm = "AM";
+              }
+
+              $("#bus-screen .result-container .mdc-list").append("<li class='mdc-list-item mdc-typography'>" + indexN + ". " + value.des + " | Time Arrival: " + hourPart + ":" + prdtmTime[1] + ampm + "</li>");
+              $("#bus-screen .result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+            });
+          }
+          else {
+            $("#bus-screen .result-container .mdc-list").append("<strong>No arrival times</strong>");
+            $("#bus-screen .result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+          }
+        });
+      }
+      else {
+        console.log("missing info");
+      }
+    });
+  </script>
+
+  <!--setting screen and database-->
+  <script>
+    /* global Dexie */ /* global $ */
+    var db = new Dexie("CtaTrackerDB");
+    db.version(1).stores({ settings: "id++, fontSize, fontFamily, fontColor" });
+    db.on("populate", function() {
+      db.settings.add({ name: "fontSize", value: "1rem" }); //font-size (html, body)
+      db.settings.add({ name: "fontFamily", value: "Roboto,sans-serif" }); //font-family (.mdc-typography)
+      db.settings.add({ name: "fontColor", value: "#000000" }); //color (.mdc-typography)
+    });
+
+    $(".setting-button").on("click", function() {
+      var fontSize = document.getElementById("fontSize-select").value;
+      var fontFamily = document.getElementById("fontFamily-select").value;
+      var fontColor = document.getElementById("fontColor-select").value;
+      //console.log(fontSize + " " + fontFamily + " " + fontColor);
+
+      db.open().then(function(settings) {
+        db.settings.update(1, { value: fontSize });
+        db.settings.update(2, { value: fontFamily });
+        db.settings.update(3, { value: fontColor });
+      }).then(function() {
+        // Get font size
+        db.settings.get(1, function(response) {
+          console.log(response.value);
+          $("html, body").css("font-size", response.value);
+        });
+        // Get font family
+        db.settings.get(2, function(response) {
+          console.log(response.value);
+          $(".mdc-typography").css("font-family", response.value);
+        });
+        // Get font color
+        db.settings.get(3, function(response) {
+          console.log(response.value);
+          $(".mdc-typography").css("color", response.value);
+        });
+      });
+    });
+  </script>
+
+  <!--train screen-->
+  <script>
+    /* global $ */
+    var data;
+    $.ajax({
+      type: "GET",
+      url: "./cta_L_stops_new.csv",
+      dataType: "text",
+      success: function(response) {
+        data = $.csv.toArrays(response);
+        console.log(data);
+      }
+    });
+    
+    // user selected a train line option
+    function onTrainColorSelect(){
+    
+    }
+  </script>
+</body>
+
+</html>
