@@ -12,10 +12,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/6.0.0/normalize.min.css">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/material-components-web@0.9.1/dist/material-components-web.min.css">
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="./app.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
 </head>
 
 <body class="mdc-typography">
@@ -35,7 +35,6 @@
     <nav class="mdc-temporary-drawer__drawer">
       <header class="mdc-temporary-drawer__header"></header>
       <nav class="mdc-temporary-drawer__content mdc-list">
-        <a class="mdc-list-item" href="#home-screen">Home</a>
         <a class="mdc-list-item" href="#bus-screen">Bus Tracker</a>
         <a class="mdc-list-item" href="#train-screen">Train Tracker</a>
         <a class="mdc-list-item" href="#map-screen">Map</a>
@@ -44,8 +43,36 @@
     </nav>
   </aside>
 
-  <div id="home-screen" class="mdc-layout-grid mdc-toolbar-fixed-adjust screen">Home</div>
-  <div id="bus-screen" class="mdc-layout-grid mdc-toolbar-fixed-adjust hidden screen">Bus</div>
+  <div id="bus-screen" class="mdc-toolbar-fixed-adjust screen">
+    <!--dropdown lists container-->
+    <div class="mdc-layout-grid">
+      <div class="route-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="route-select" onchange="getDirection(this.value)">
+          <option value="" selected>Pick a route</option>
+          <!--<option value="grains">Bread, Cereal, Rice, and Pasta</option>-->
+        </select>
+      </div>
+      <div class="direction-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="dir-select" onchange="getstop()">
+          <option value="">Pick a direction</option>
+        </select>
+      </div>
+      <div class="stop-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="stop-select">
+          <option value="">Pick a stop</option>
+        </select>
+      </div>
+      <div class="mdc-layout-grid__cell--span-3 bus-button-div">
+        <button class="mdc-button bus-button">Search</button>
+      </div>
+    </div>
+    <!--result container-->
+    <div class="result-container">
+      <ul class="mdc-list">
+      </ul>
+    </div>
+  </div>
+
   <div id="train-screen" class="mdc-layout-grid mdc-toolbar-fixed-adjust hidden screen">Train</div>
   <div id="map-screen" class="mdc-layout-grid mdc-toolbar-fixed-adjust hidden screen">Map</div>
   <div id="setting-screen" class="mdc-layout-grid mdc-toolbar-fixed-adjust hidden screen">Setting</div>
@@ -53,11 +80,13 @@
   <!--Ink ripple effect for toolbar menu button-->
   <script src="https://unpkg.com/material-components-web@0.9.1/dist/material-components-web.min.js"></script>
   <script>
+    /*global mdc*/
     mdc.autoInit()
   </script>
 
   <!--open drawer-->
   <script>
+    /*global mdc*/
     mdc.autoInit();
     document.getElementById('cta-nav-icon').addEventListener('click', function(evt) {
       evt.preventDefault();
@@ -67,6 +96,7 @@
 
   <!-- service worker -->
   <script>
+    /*global navigator*/
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('./service-worker.js')
@@ -84,6 +114,105 @@
       $(".screen").addClass("hidden");
       $($(this).attr("href")).removeClass("hidden");
       event.preventDefault();
+    });
+  </script>
+
+  <!--bus screen script-->
+  <script>
+    /* global $ */
+    document.getElementById("dir-select").disabled = true;
+    document.getElementById("stop-select").disabled = true;
+
+    // Get list of bus routes and append to dropdown list
+    $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getroutes&key=EehpVy69CVGcgPEnfxrpiaX9y&format=json", function(response) {
+      //console.log(response);
+      var jsonObj = JSON.parse(response);
+      console.log(jsonObj["bustime-response"]["routes"]);
+      $.each(jsonObj["bustime-response"]["routes"], function(index, value) {
+        //console.log(value.rt);
+        $("#bus-screen .route-dropdown .mdc-select").append("<option value='" + value.rt + "'>" + value.rt + " - " + value.rtnm + "</option>");
+      });
+    });
+
+    // Get direction of routes after user select a route
+    function getDirection(rtValue) {
+      $("#bus-screen .direction-dropdown .mdc-select").empty();
+      $("#bus-screen .direction-dropdown .mdc-select").append("<option value='' selected>Pick a direction</option>");
+      $("#bus-screen .stop-dropdown .mdc-select").empty();
+      $("#bus-screen .stop-dropdown .mdc-select").append("<option value='' selected>Pick a stop</option>");
+      console.log(rtValue);
+
+      $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getdirections&key=EehpVy69CVGcgPEnfxrpiaX9y&format=json&rt=" + rtValue, function(response) {
+        var jsonObj = JSON.parse(response);
+        console.log(jsonObj["bustime-response"]["directions"]);
+        $.each(jsonObj["bustime-response"]["directions"], function(index, value) {
+          $("#bus-screen .direction-dropdown .mdc-select").append("<option value ='" + value.dir + "'>" + value.dir + "</option>");
+        });
+        document.getElementById("dir-select").disabled = false;
+      });
+    }
+
+    // Get the stops with route and direction
+    function getstop() {
+      var busRoute = document.getElementById("route-select").value;
+      var busDir = document.getElementById("dir-select").value;
+
+      $("#bus-screen .stop-dropdown .mdc-select").empty();
+      $("#bus-screen .stop-dropdown .mdc-select").append("<option value='' selected>Pick a stop</option>");
+
+      $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getstops&key=EehpVy69CVGcgPEnfxrpiaX9y&format=json&rt=" + busRoute + "&dir=" + busDir, function(response) {
+        var jsonObj = JSON.parse(response);
+        $.each(jsonObj["bustime-response"]["stops"], function(index, value) {
+          $("#bus-screen .stop-dropdown .mdc-select").append("<option value='" + value.stpid + "'>" + value.stpnm + "</option>");
+        });
+        document.getElementById("stop-select").disabled = false;
+      });
+    }
+
+    // Button to get value from dropdown lists and get time prediction of next avaliable bus
+    $(".bus-button").on("click", function() {
+      var busRoute = document.getElementById("route-select").value;
+      var busStop = document.getElementById("stop-select").value;
+      var indexN = 0;
+      $("#bus-screen .result-container .mdc-list").empty();
+      console.log(busRoute + " " + busStop);
+
+      // Get prediction time
+      if (busRoute != "" && busStop != "") {
+        $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://ctabustracker.com/bustime/api/v2/getpredictions&key=EehpVy69CVGcgPEnfxrpiaX9y&format=json&rt=" + busRoute + "&stpid=" + busStop, function(response) {
+          var jsonObj = JSON.parse(response);
+          console.log(jsonObj["bustime-response"]["prd"]);
+          $("#bus-screen .result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+
+          if (jsonObj["bustime-response"]["prd"] != null) {
+            $.each(jsonObj["bustime-response"]["prd"], function(index, value) {
+              indexN++;
+              var prdtmPart = value.prdtm.split(" ");
+              var prdtmTime = prdtmPart[1].split(":");
+              var ampm = "";
+              var hourPart = "";
+
+              // convert 24hr to 12hr time
+              if (prdtmTime[0] > 11) {
+                ampm = "PM";
+                if (prdtmTime[0] > 12) {
+                  hourPart = prdtmTime[0] - 12;
+                }
+              }
+
+              $("#bus-screen .result-container .mdc-list").append("<li class='mdc-list-item'>" + indexN + ". " + value.des + " | Time Arrival: " + hourPart + ":" + prdtmTime[1] + ampm + "</li>");
+              $("#bus-screen .result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+            });
+          }
+          else {
+            $("#bus-screen .result-container .mdc-list").append("<strong>No arrival times</strong>");
+            $("#bus-screen .result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+          }
+        });
+      }
+      else {
+        console.log("missing info");
+      }
     });
   </script>
 </body>

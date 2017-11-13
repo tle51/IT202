@@ -73,3 +73,21 @@ html, body {
 .hidden{
   display: none;
 }
+
+.route-dropdown {
+  width: 700px;
+  padding: 4px;
+}
+
+.direction-dropdown{
+  width: 200px;
+  padding: 4px;
+}
+
+.stop-dropdown{
+  padding: 4px;
+}
+
+.bus-button-div{
+  padding-top: 5px;
+}

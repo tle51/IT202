@@ -1,0 +1,65 @@
+<!--Geolocation with Google Maps--><!DOCTYPE html><html><head><style>#map {
+    height: 400px;
+    width: 100%;
+}
+
+</style></head><body><h3>My Google Maps With Geolocation Demo</h3><div id="map"></div><script>var lat;
+var long;
+
+function getCoordinateX(xlat) {
+    return xlat;
+}
+
+function getCoordinateY(xlong) {
+    return xlong;
+}
+
+function getLocation() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            initMap(position.coords.latitude, position.coords.longitude);
+        }
+        );
+    }
+    else {
+        /*no geo location*/
+        alert("no geolocation");
+    }
+}
+
+function initMap(lat, long) {
+
+    var uluru= {
+        lat: lat, lng: long
+    }
+    ;
+    var map=new google.maps.Map(document.getElementById('map'), {
+        zoom: 12,
+        center: uluru
+    }
+    );
+    var marker=new google.maps.Marker( {
+        position: uluru,
+        map: map
+    }
+    );
+
+    map.addListener('click', function(e) {
+        placeMarkerAndPanTo(e.latLng, map);
+    }
+    ); // place a new marker and center map 
+    function placeMarkerAndPanTo(latLng, map) {
+        var marker=new google.maps.Marker( {
+            position: latLng,
+            map: map
+        }
+        );
+        map.panTo(latLng); //center map to new coordinate
+    }
+    ;
+
+    console.log(lat + " " + long);
+
+}
+
+</script><script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJYA2Usidu4Gnz0X2BfWWIAoaBm6lCiZ0&callback=getLocation"></script></body></html>
