@@ -108,7 +108,20 @@
           <option value="14">Pink</option>
           <option value="15">Orange</option>
         </select>
-      </div>  
+      </div>
+      <div class="train-stop-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="train-stop-select" onchange="">
+          <option value="" selected>Pick a stop</option>
+        </select>
+      </div>
+      <div class="train-dir-dropdown mdc-layout-grid__cell--span-3">
+        <select class="mdc-select" id="train-dir-select">
+          <option value="" selected>Pick a direction</option>
+        </select>
+      </div>
+      <div class="mdc-layout-grid__cell--span-3">
+        <button class="mdc-button train-button">Search</button>
+      </div>
     </div>
     
   </div>
@@ -374,7 +387,7 @@
     
     // user selected a train line option
     function onTrainColorSelect(){
-        
+    
     }
   </script>
 </body>
