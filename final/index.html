@@ -46,7 +46,7 @@
   </aside>
 
   <!--bus screen-->
-  <div id="bus-screen" class="mdc-toolbar-fixed-adjust hidden screen">
+  <div id="bus-screen" class="mdc-toolbar-fixed-adjust screen">
     <div class="mdc-layout-grid">
       <h1 class="mdc-typography screen-header">Bus Tracker</h1>
     </div>
@@ -85,7 +85,7 @@
   </div>
 
   <!--train screen-->
-  <div id="train-screen" class="mdc-toolbar-fixed-adjust screen">
+  <div id="train-screen" class="mdc-toolbar-fixed-adjust hidden screen">
     <div class="mdc-layout-grid">
       <h1 class="mdc-typography screen-header">Train Tracker</h1>
     </div>
@@ -96,8 +96,8 @@
     </div>
     <!---->
     <div class="mdc-layout-grid">
-      <div class="train-color-dropdown mdc-layout-grid__cell--span-3">
-        <select class="mdc-select" id="train-color-select" onchange="onTrainColorSelect()">
+      <div class="train-color-dropdown mdc-layout-grid__cell--span-4">
+        <select class="mdc-select" id="train-color-select" onchange="onTrainColorSelect(this.value)">
           <option value ="" selected>Pick a train line</option>
           <option value="7">Red</option>
           <option value="8">Blue</option>
@@ -109,21 +109,19 @@
           <option value="15">Orange</option>
         </select>
       </div>
-      <div class="train-stop-dropdown mdc-layout-grid__cell--span-3">
+      <div class="train-stop-dropdown mdc-layout-grid__cell--span-4">
         <select class="mdc-select" id="train-stop-select" onchange="">
           <option value="" selected>Pick a stop</option>
         </select>
       </div>
-      <div class="train-dir-dropdown mdc-layout-grid__cell--span-3">
-        <select class="mdc-select" id="train-dir-select">
-          <option value="" selected>Pick a direction</option>
-        </select>
-      </div>
-      <div class="mdc-layout-grid__cell--span-3">
+      <div class="mdc-layout-grid__cell--span-4">
         <button class="mdc-button train-button">Search</button>
       </div>
     </div>
-    
+    <div class="train-result-container">
+      <ul class="mdc-list">
+      </ul>
+    </div>
   </div>
 
   <!--map screen-->
@@ -300,20 +298,20 @@
               var ampm = "";
               var hourPart = "";
 
-              // convert 24hr to 12hr time
+              //convert 24hr to 12hr time
               if (prdtmTime[0] > 11) {
                 ampm = "PM";
                 hourPart = 12;
                 if (prdtmTime[0] > 12) {
                   hourPart = prdtmTime[0] - 12;
-                  console.log(hourPart);
+                  //console.log(hourPart);
                 }
               }
               else {
                 hourPart = prdtmTime[0];
                 ampm = "AM";
               }
-
+              
               $("#bus-screen .result-container .mdc-list").append("<li class='mdc-list-item mdc-typography'>" + indexN + ". " + value.des + " | Time Arrival: " + hourPart + ":" + prdtmTime[1] + ampm + "</li>");
               $("#bus-screen .result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
             });
@@ -374,21 +372,74 @@
   <!--train screen-->
   <script>
     /* global $ */
-    var data;
-    $.ajax({
+    document.getElementById("train-stop-select").disabled = true;
+    
+    // user selected a train line option
+    function onTrainColorSelect(index){
+      $("#train-screen .train-stop-dropdown .mdc-select").empty();
+      $("#train-screen .train-stop-dropdown .mdc-select").append("<option value='' selected>Pick a stop</option>");
+      //console.log(index);
+      
+      $.ajax({
       type: "GET",
       url: "./cta_L_stops_new.csv",
       dataType: "text",
       success: function(response) {
-        data = $.csv.toArrays(response);
-        console.log(data);
+        var data = $.csv.toArrays(response);  //array of array
+        
+        $.each(data, function(i, value){
+          if(value[index] == "TRUE"){
+            $("#train-screen .train-stop-dropdown .mdc-select").append("<option value='" + value[0] + "'>" + value[2] + "</option>");
+          }
+        });
+        
+        document.getElementById("train-stop-select").disabled = false;
       }
     });
-    
-    // user selected a train line option
-    function onTrainColorSelect(){
-    
     }
+    
+    // user selected a train stop
+    $(".train-button").on("click", function(){
+      var stopId = document.getElementById("train-stop-select").value;
+      var indexN = 0;
+      $("#train-screen .train-result-container .mdc-list").empty();
+      //console.log(document.getElementById("train-stop-select").value);
+      
+      if(stopId != ""){
+        $.get("https://polar-garden-75406.herokuapp.com/apiPassThru.php?apiEndpoint=http://lapi.transitchicago.com/api/1.0/ttarrivals.aspx&key=0f45adf70a7b43afad36915e26d62096&outputType=json&stpid=" + stopId, function(response){
+          $("#train-screen .train-result-container .mdc-list").append("<h3 class='mdc-typography sub-header'>Arrival Times</h3>");
+          $("#train-screen .train-result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+          
+          var jsonObj = JSON.parse(response);
+          //console.log(jsonObj["ctatt"]["eta"]);
+          if(jsonObj["ctatt"]["eta"] != null){
+            $.each(jsonObj["ctatt"]["eta"], function(i,v){
+              indexN++;
+              
+              // calculate time arrival
+              var waitT = "";
+              var prdT = new Date(v.prdt);
+              var arrT = new Date(v.arrT);
+              waitT = Math.abs(arrT - prdT) / 60000;
+              //console.log( v.prdt + " " + v.arrT);
+              console.log(indexN + ". " + prdT + " " + arrT);
+              
+              // append to result container
+              $("#train-screen .train-result-container .mdc-list").append("<li class='mdc-list-item mdc-typography'>" + indexN + ". " + v.destNm + " | Time Arrival: " + waitT + " Min</li>");
+              $("#train-screen .train-result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+              
+            })
+          }
+          else{
+            $("#train-screen .train-result-container .mdc-list").append("<strong>No arrival times</strong>");
+            $("#train-screen .train-result-container .mdc-list").append("<li role='separator' class='mdc-list-divider'></li>");
+          }
+        });
+      }
+      else{
+        console.log("missing info");
+      }
+    });
   </script>
 </body>
 
