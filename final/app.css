@@ -108,8 +108,33 @@ html, body {
 
 .setting-button{
   border: 1px solid lightgrey;
+  margin-left: 15px;
 }
 
 .bus-button{
   border: 1px solid lightgrey;
+}
+
+.train-button, .train-map-button{
+  border: 1px solid lightgrey;
+}
+
+.bus-map-button{
+  border: 1px solid lightgrey;
+}
+
+#map {
+    height: 600px;
+    width: 100%;
+}
+
+.hide-map{
+  visibility: hidden;
+}
+
+.map-button-container{
+  width: 100%;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
 }
