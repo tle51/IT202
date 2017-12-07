@@ -26,8 +26,8 @@
             
             $("#sayIt").on("click", function(){
                 var msg = new SpeechSynthesisUtterance($("#result").text());
-                msg.lg = 'ja';
-                //...
+                msg.lang = 'ja';
+                speechSynthesis.speak(msg);
             });
         });
     </script>
